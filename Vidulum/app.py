@@ -52,16 +52,6 @@ def populate():
     return 'good'
 
 
-@app.route('/user')
-def user():
-    with db.db_session:
-        users = db.select(u for u in db.User)
-        print('all users:')
-        for u in users:
-            print(u)
-        users = list(users)
-    ret_str = '{} users\n'.format(len(users))
-    return ret_str
 
 
 @app.route('/dashboard/<string:email>')
@@ -99,5 +89,154 @@ def hello_world():
                 for c in mc.categories:
                     print('\t\t',mc,'-',c)
     return 'Hello, World!'
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # #
+#
+#         API    API    API    API
+#
+# # # # # # # # # # # # # # # # # # # # #
+
+#budgets/{budget_id}
+#budgets/{budget_id}/accounts
+#budgets/{budget_id}/categories
+#budgets/{budget_id}/months
+#budgets/{budget_id}/payees
+#budgets/{budget_id}/transactions
+#budgets/{budget_id}/scheduled_transactions
+
+
+# # # # User
+
+
+@app.route('/user')
+def user():
+    # authenticated user info
+    with db.db_session:
+        users = db.select(u for u in db.User)
+        print('all users:')
+        for u in users:
+            print(u)
+        users = list(users)
+    ret_str = '{} users\n'.format(len(users))
+    return ret_str
+
+
+# # # # Budgets
+
+@app.route('/budgets')
+def budgets():
+    # list of budgets
+    pass
+
+@app.route('/budgets/<string:budget_id>')
+def budget(budget_id):
+    # budget info
+    pass
+
+
+@app.route('/budgets/<string:budget_id>/settings')
+def budget_settings(budget_id):
+    # budget settings info
+    pass
+
+# # # # Accounts
+@app.route('/budgets/<string:budget_id>/accounts')
+def accounts(budget_id):
+    # list acounts or create new accounts
+    pass
+
+@app.route('/budgets/<string:budget_id>/<string:account_id>')
+def account(budget_id, account_id):
+    # account info
+    pass
+
+
+# # # # Categories
+
+@app.route('/budgets/<string:budget_id>/categories')
+def categories(budget_id):
+    # list categories
+    pass
+
+@app.route('/budgets/<string:budget_id>/categories/<string:category_id>')
+def category(budget_id, category_id):
+    # category info
+    pass
+
+
+@app.route('/budgets/<string:budget_id>/months/<string:month>/categories/<string:category_id>')
+def category_month(budget_id, month, category_id):
+    # get OR update category info for specific month
+    pass
+
+
+
+
+# # # # Payees
+@app.route('/budgets/<string:budget_id>/payees')
+def payees(budget_id):
+    # list acounts or create new accounts
+    pass
+
+
+@app.route('/budgets/<string:budget_id>/payees/<string:payee_id>')
+def payee(budget_id, payee_id):
+    # payee info
+    pass
+
+
+# # # # Months
+@app.route('/budgets/<string:budget_id>/months')
+def months(budget_id):
+    # list months
+    pass
+
+@app.route('/budgets/<string:budget_id>/months/<string:month>')
+def get_month(budget_id, month):
+    # month info
+    pass
+
+# # # # Transactions
+@app.route('/budgets/<string:budget_id>/transactions')
+def transactions(budget_id):
+    # get, post or update transactions
+    pass
+
+@app.route('/budgets/<string:budget_id>/months/<string:transactions_id>')
+def month(budget_id, transaction_id):
+    # get or update specific transaction
+    pass
+
+@app.route('/budgets/<string:budget_id>/accounts/<string:account_id>/transactions')
+def transactions_account(budget_id_, account_id):
+    # get account transactions
+    pass
+
+@app.route('/budgets/<string:budget_id>/categories/<string:category_id>/transactions')
+def transactions_category(budget_id_, category_id):
+    # get category transactions
+    pass
+
+@app.route('/budgets/<string:budget_id>/payees/<string:payee_id>/transactions')
+def transactions_payee(budget_id_, payee_id):
+    # get payee transactions
+    pass
+
+
+
+# # # # Schedueld Transactions
+
+@app.route('/budgets/<string:budget_id>/scheduled_transactions')
+def transactions_scheduled(budget_id):
+    # list scheduled transactions
+    pass
+
+@app.route('/budgets/<string:budget_id>/scheduled_transactions/<string:scheduled_transaction_id>')
+def transaction_scheduled(budget_id, scheduled_transaction_id):
+    # list scheduled transaction info
+    pass
 
 
