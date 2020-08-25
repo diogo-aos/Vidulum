@@ -4,14 +4,12 @@ from pony.orm import *
 
 db = Database()
 
-
 class Category(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Required(str)
     MC = Required('MetaCategory')
     blines = Set('BudgetLine')
     transactions = Set('Transaction')
-
 
 class MetaCategory(db.Entity):
     id = PrimaryKey(int, auto=True)
@@ -58,12 +56,17 @@ class Budget(db.Entity):
 
 class User(db.Entity):
     id = PrimaryKey(int, auto=True)
-    email = Required(str)
+    email = Required(str, unique=True)
     budgets = Set(Budget)
+    
+    def __str__(self):
+        return 'User<id={}, email={}>'.format(self.id, self.email)
+        
 
-db.bind(provider='sqlite', filename=':memory:')
-sql_debug(True)
-db.generate_mapping(create_tables=True)
+
+#db.bind(provider='sqlite', filename=':memory:')
+#sql_debug(True)
+#db.generate_mapping(create_tables=True)
 
 
     
