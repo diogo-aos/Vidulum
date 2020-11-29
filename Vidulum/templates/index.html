@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<h1> Vidulum </h1>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4">
+            <form method=POST action="{{ url_for('login') }}">
+                <div class="form-group">
+                    <input type="text" class="form-control" name="email" placeholder="email">
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" name="password" placeholder="Password">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Log In</button>
+            </form>
+            <br>
+            <div>
+                Don't have an account? <a href="{{ url_for('register') }}">Sign up here</a>.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -14,7 +14,7 @@
     <title>Hello, world!</title>
   </head>
   <body>
-    <h1>Hello, world!</h1>
+    <h1>Hello, {{ email }}!</h1>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -22,21 +22,26 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
 
+
+
 <ul class="nav nav-tabs" id="myTab" role="tablist">
   <li class="nav-item" role="presentation">
-    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#budget" role="tab" aria-controls="budget" aria-selected="true">Budget</a>
+    <a class="nav-link active" id="budget-tab" data-toggle="tab" href="#budget" role="tab" aria-controls="budget" aria-selected="true">Budget</a>
   </li>
   <li class="nav-item" role="presentation">
-    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#transactions" role="tab" aria-controls="transacitons" aria-selected="false">Transactions</a>
+    <a class="nav-link" id="transactions-tab" data-toggle="tab" href="#transactions" role="tab" aria-controls="transactions" aria-selected="false">Transactions</a>
   </li>
   <li class="nav-item" role="presentation">
-    <a class="nav-link" id="contact-tab" data-toggle="tab" href="#accounts" role="tab" aria-controls="accounts" aria-selected="false">Accounts</a>
+    <a class="nav-link" id="accounts-tab" data-toggle="tab" href="#accounts" role="tab" aria-controls="accounts" aria-selected="false">Accounts</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="logout-tab"  href="/logout"  aria-controls="logout" aria-selected="false">Logout</a>
   </li>
 </ul>
 <div class="tab-content" id="myTabContent">
-  <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">{% include 'budget.html' %}</div>
-  <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">{% include 'transactions.html' %}</div>
-  <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">{% include 'accounts.html' %}</div>
+  <div class="tab-pane fade show active" id="budgets" role="tabpanel" aria-labelledby="home-tab">{% include 'budget.html' %}</div>
+  <div class="tab-pane fade" id="transactions" role="tabpanel" aria-labelledby="profile-tab">{% include 'transactions.html' %}</div>
+  <div class="tab-pane fade" id="accounts" role="tabpanel" aria-labelledby="contact-tab">{% include 'accounts.html' %}</div>
 </div>
 
   </body>

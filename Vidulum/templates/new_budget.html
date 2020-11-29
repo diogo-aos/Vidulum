@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<h1> New budget </h1>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4">
+            <form method=POST action="{{ url_for('budget') }}">
+                <div class="form-group">
+                    <input type="text" class="form-control" name="budget_name" placeholder="Budget's name">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">Create</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

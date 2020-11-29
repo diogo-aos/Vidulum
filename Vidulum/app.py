@@ -1,16 +1,111 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, url_for, request, session, redirect
+#from flask.ext.pymongo import PyMongo
+import bcrypt
+import mongo
 
 import datetime
-import database as db
+import os
 
 
 app = Flask(__name__)
+app.secret_key = b'mysecret'
 
-db.sql_debug(True)
-db.db.bind(provider='sqlite', filename='test_db.sqlite', create_db=True)
-db.db.generate_mapping(create_tables=True)
+mongo_username = os.environ['DB_USER_USERNAME']
+mongo_password = os.environ['DB_USER_PASSWORD']
+mongo_addr = os.environ['DB_MONGO_LINK']
+mongo_dbname = os.environ['DB_MONGO_DATABASE']
+mongo_uri = "mongodb+srv://{username}:{password}@{db_mongo_addr}/{db_mongo_name}?retryWrites=true&w=majority".format(username=mongo_username, password=mongo_password, db_mongo_addr=mongo_addr, db_mongo_name=mongo_dbname)
 
-@db.db_session
+app.config['MONGO_DBNAME'] = mongo_dbname
+app.config['MONGO_URI'] = mongo_uri
+
+#mongo = PyMongo(app)
+
+@app.route('/')
+def index():
+    if 'email' in session:
+        return render_template('dashboard.html', email=session['email'])
+        return 'You are logged in as ' + session['email']
+
+    return render_template('index.html')
+
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    users = mongo.db.users
+    login_user = users.find_one({'email' : request.form['email']})
+
+    if login_user:
+        if mongo.pwd_context.verify(request.form['password'], login_user['password']):
+            session['email'] = login_user['email']
+
+            login_user['settings']['last_login'] = datetime.datetime.utcnow()
+            users.replace_one({'email':login_user['email']}, login_user)
+
+            return redirect(url_for('index'))
+
+    return 'Invalid username/password combination'
+
+@app.route('/logout', methods=['GET'])
+def logout():
+    session.pop('email')
+    return redirect(url_for('index'))
+    
+
+
+@app.route('/register', methods=['POST', 'GET'])
+def register():
+    if request.method == 'POST':
+        users = mongo.db.users
+        existing_user = users.find_one({'email' : request.form['email']})
+        print('result from mongo query:', existing_user)
+
+        if existing_user is None:
+            print('password is ', request.form['password'])
+            mongo.user_create(request.form['email'], request.form['password'])
+            return redirect(url_for('index'))
+        
+        return 'That username already exists!'
+
+    return render_template('register.html')
+
+@app.route('/budget', methods=['POST'])
+def create_budget():
+    if 'email' not in session:
+        return 'you must log in'
+
+    budgets = mongo.db.users
+    budgets = mongo.db.budgets
+    
+    user = users.find_one({'email' : session['email']})
+
+
+
+
+
+    if login_user:
+        if mongo.pwd_context.verify(request.form['password'], login_user['password']):
+            session['email'] = login_user['email']
+
+            login_user['settings']['last_login'] = datetime.datetime.utcnow()
+            users.replace_one({'email':login_user['email']}, login_user)
+
+            return redirect(url_for('index'))
+
+    return 'Invalid username/password combination'
+
+
+
+
+#
+#
+#
+#
+#
+#
+
+
 def create_test_data():
     print('Adding test data to database...')
     u = db.User(email='akins.daos@gmail.com')
@@ -75,20 +170,20 @@ def dashboard(email):
         return render_template('dashboard.html', budget_lines=sorted(categories))
 
 
-@app.route('/')
+@app.route('/in')
 def hello_world():
-
-    # get all categories from user
-    users = [u for u in User]
-    for u in users:
-        print('user:', u.email)
-        for b in u.budgets:
-            print('\tBudget:', b.name)
-            print('Categories')
-            for mc in b.meta_categories:
-                for c in mc.categories:
-                    print('\t\t',mc,'-',c)
-    return 'Hello, World!'
+    with db.db_session:
+        # get all categories from user
+        users = [u for u in User]
+        for u in users:
+            print('user:', u.email)
+            for b in u.budgets:
+                print('\tBudget:', b.name)
+                print('Categories')
+                for mc in b.meta_categories:
+                    for c in mc.categories:
+                        print('\t\t',mc,'-',c)
+        return 'Hello, World!'
 
 
 
@@ -239,4 +334,9 @@ def transaction_scheduled(budget_id, scheduled_transaction_id):
     # list scheduled transaction info
     pass
 
+
+if __name__ == '__main__':
+
+    app.config['SESSION_TYPE'] = 'filesystem'
+    app.run(debug=True)
 
