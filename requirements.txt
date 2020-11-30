@@ -1,2 +1,4 @@
 flask
-pony
+pymongo
+passlib
+dnspython
