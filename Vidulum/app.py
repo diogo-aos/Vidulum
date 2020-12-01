@@ -68,10 +68,8 @@ def register():
     if request.method == 'POST':
         users = mongo.db.users
         existing_user = users.find_one({'email' : request.form['email']})
-        print('result from mongo query:', existing_user)
 
         if existing_user is None:
-            print('password is ', request.form['password'])
             mongo.user_create(request.form['email'], request.form['password'])
             return redirect(url_for('index'))
         
@@ -79,6 +77,32 @@ def register():
 
     return render_template('register.html')
 
+
+@app.route("/api/v<version>/budget/<budget_id>")
+def api_budget(api_version, budget_id):
+    if "user_id" not in session:
+        return {"error": "not authenticated"}
+
+    user = mongo.db.users.find_one({"_id": bson.ObjectId(session["user_id"])})
+    budget = mongo.db.budgets.find_one({"_id": bson.ObjectId(budget_id)})
+
+    if not budget:
+        return {"error": "budget does not exist"}
+
+    if budget["_id"] not in user["budgets"]:
+        return {"error": "budget does not belong to user"}
+
+    categories = {}
+    render_categories = []
+    for g_id in budget["category_groups"]:
+        group = mongo.db.category_groups.find_one({"_id": g_id})
+        categories[group["name"]] = []
+        for c_id in group["categories"]:
+            category = mongo.db.categories.find_one({"_id": c_id})
+            categories[group["name"]].append(category)
+            render_categories.append('{} - {}'.format(group["name"], category["name"]))
+
+    
 
 @app.route('/budget/<budget_id>')
 def budget(budget_id):
