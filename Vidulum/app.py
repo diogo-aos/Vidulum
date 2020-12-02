@@ -4,7 +4,7 @@ import os
 import bson
 
 # third party libraries
-from flask import Flask, render_template, url_for, request, session, redirect
+from flask import Flask, render_template, url_for, request, session, redirect, jsonify
 
 
 # my app
@@ -71,11 +71,16 @@ def register():
 
         if existing_user is None:
             mongo.user_create(request.form['email'], request.form['password'])
-            return redirect(url_for('index'))
+            return redirect(url_for('register_success'))
         
         return 'That username already exists!'
 
     return render_template('register.html')
+
+
+@app.route("/register/success", methods=["GET"])
+def register_success():
+    return redirect(url_for('static', filename='/html/register_success.html'))
 
 
 @app.route("/api/v<version>/budget/<budget_id>")
@@ -83,6 +88,7 @@ def api_budget(api_version, budget_id):
     if "user_id" not in session:
         return {"error": "not authenticated"}
 
+    print("api_budget() || getting user and budget from mongodb")
     user = mongo.db.users.find_one({"_id": bson.ObjectId(session["user_id"])})
     budget = mongo.db.budgets.find_one({"_id": bson.ObjectId(budget_id)})
 
@@ -92,47 +98,28 @@ def api_budget(api_version, budget_id):
     if budget["_id"] not in user["budgets"]:
         return {"error": "budget does not belong to user"}
 
-    categories = {}
-    render_categories = []
-    for g_id in budget["category_groups"]:
-        group = mongo.db.category_groups.find_one({"_id": g_id})
-        categories[group["name"]] = []
-        for c_id in group["categories"]:
-            category = mongo.db.categories.find_one({"_id": c_id})
-            categories[group["name"]].append(category)
-            render_categories.append('{} - {}'.format(group["name"], category["name"]))
+    print("api_budget() || getting categories from mongodb")
 
+    categories = [mongo.db.categories.find_one({"_id": c_id}) for c_id in budget["categories"]]
+    categories = sorted(categories, key=lambda x: x["master_category"])
+    render_categories = ["{} - {}".format(c["master_category"], c["name"]) for c in categories]
+
+    print("api_budget() || returning render categories")
+
+    return jsonify({"data": render_categories})
     
 
 @app.route('/budget/<budget_id>')
 def budget(budget_id):
-    print("inside budget")
-    # check if: user is logged in, budget exists, budget belongs to logged user
-    if "user_id" not in session:
-        return "you need to login"
-        return redirect(url_for("index"))
+    print("budget() || got request budget", budget_id)
+    data = api_budget("v1", budget_id)
+    print("budget() || got data")
 
-    user = mongo.db.users.find_one({"_id": bson.ObjectId(session["user_id"])})
-    print(user)
-    budget = mongo.db.budgets.find_one({"_id": bson.ObjectId(budget_id)})
-
-    if not budget:
-        return "budget does not exist"
-
-    if budget["_id"] not in user["budgets"]:
-        return "this budget does not belong to you"
-
-    categories = {}
-    render_categories = []
-    for g_id in budget["category_groups"]:
-        group = mongo.db.category_groups.find_one({"_id": g_id})
-        categories[group["name"]] = []
-        for c_id in group["categories"]:
-            category = mongo.db.categories.find_one({"_id": c_id})
-            categories[group["name"]].append(category)
-            render_categories.append('{} - {}'.format(group["name"], category["name"]))
+    data = data.get_json()
+    if "error" in data:
+        return data
             
-    return render_template('dashboard.html', email=user["email"], budget_lines=sorted(render_categories))
+    return render_template('dashboard.html', email=session["email"], budget_lines=data["data"])
 
 
 
